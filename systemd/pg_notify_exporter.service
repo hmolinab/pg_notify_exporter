@@ -1,0 +1,18 @@
+[Unit]
+Description=Postgres notify exporter
+After=network.target
+
+[Service]
+Type=simple
+User=prometheus
+WorkingDirectory=/opt/prometheus/exporters/pg_notify_exporter
+ExecStart=/usr/bin/puma -C config/puma.rb --dir /opt/prometheus/exporters/pg_notify_exporter
+#ExecStart=/usr/local/bin/bundle exec puma -C config/puma.rb --dir /opt/prometheus/exporters/pg_notify_exporter
+#ExecStart=/usr/local/rvm/bin/rvm all do bundle exec puma -C config/puma.rb --dir /opt/prometheus/exporters/pg_notify_exporter
+#ExecStart=/opt/exporters/pg_notify_exporter/bin/pg_notify_exporter
+TimeoutSec=15
+Restart=always
+WatchdogSec=30
+
+[Install]
+WantedBy=multi-user.target

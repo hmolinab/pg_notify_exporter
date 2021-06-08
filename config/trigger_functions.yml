@@ -1,0 +1,65 @@
+---
+  - name: notification_with_payload
+    function_body: >-
+      CREATE OR REPLACE FUNCTION notification_with_payload()
+          RETURNS trigger AS $$
+        DECLARE
+          record RECORD;
+          payload JSON;
+          err_context text;
+        BEGIN
+          IF (TG_OP = 'DELETE') THEN
+            record = OLD;
+          ELSE
+            record = NEW;
+          END IF;
+
+          payload = json_build_object('table', TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,
+                                      'action', TG_OP,
+                                      'data', json_build_object('code',NEW.code),
+                                      'timestamp',now()::text);
+
+          PERFORM pg_notify('pg_notify_exporter', payload::text);
+          RETURN NEW;
+        EXCEPTION
+          WHEN others THEN
+              GET STACKED DIAGNOSTICS err_context = PG_EXCEPTION_CONTEXT;
+              RAISE INFO 'Error Name:%',SQLERRM;
+              RAISE INFO 'Error State:%', SQLSTATE;
+              RAISE INFO 'Error Context:%', err_context;
+              RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+
+  - name: simple_event_notification
+    function_body: |
+      CREATE OR REPLACE FUNCTION simple_event_notification()
+          RETURNS trigger AS $$
+        DECLARE
+          record RECORD;
+          payload JSON;
+          err_context text;
+        BEGIN
+          IF (TG_OP = 'DELETE') THEN
+            record = OLD;
+          ELSE
+            record = NEW;
+          END IF;
+
+          payload = json_build_object('table', TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,
+                                      'action', TG_OP,
+                                      'data', json_build_object(NULL),
+                                      'timestamp',now()::text);
+
+          PERFORM pg_notify('pg_notify_exporter', payload::text);
+          RETURN NEW;
+        EXCEPTION
+          WHEN others THEN
+              GET STACKED DIAGNOSTICS err_context = PG_EXCEPTION_CONTEXT;
+              RAISE INFO 'Error Name:%',SQLERRM;
+              RAISE INFO 'Error State:%', SQLSTATE;
+              RAISE INFO 'Error Context:%', err_context;
+              RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+...

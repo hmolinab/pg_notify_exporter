@@ -1,0 +1,4 @@
+#!/bin/bash
+#source scl_source enable rh-ruby26
+#/opt/rh/rh-ruby26/root/usr/local/bin/bundle exec puma -b tcp://0.0.0.0:9292 --dir /opt/prometheus/exporters/pg_notify_exporter
+bundle exec puma -b tcp://0.0.0.0:9292 --dir /opt/prometheus/exporters/pg_notify_exporter

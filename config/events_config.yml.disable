@@ -1,0 +1,29 @@
+---
+  - localhost:
+    - database: test
+      tag: test_tag
+      perform_setup: true
+      username: postgres
+      password: postgres
+      enabled:  true
+      monitors:
+      - table: one
+        enabled: yes
+        function: notification_with_payload
+        columns_to_label:
+          - code:
+            - 'alpha'
+            - 'beta'
+            - 'gama'
+        events:
+          - insert
+      - table: two
+        enabled: yes
+        function: simple_event_notification
+        events:
+          - INSERT
+          - delete
+        #columns_to_label:
+        #  - id:
+        #    - 1
+...
