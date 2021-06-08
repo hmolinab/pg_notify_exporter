@@ -90,7 +90,6 @@ payload = json_build_object('table', TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,
 ### Red Hat/Centos 8 instructions
 ```
  $ id prometheus || sudo /usr/sbin/adduser prometheus --system --no-create-home --shell /sbin/nologin --gid prometheus
- $ ####sudo groupinstall "Development Tools" "Development Libraries"
  $ sudo yum install git ruby ruby-devel postgresql-devel gcc make redhat-rpm-config glibc-headers -y
  $ sudo gem install bundler
  $ sudo mkdir -p /opt/prometheus/exporters
