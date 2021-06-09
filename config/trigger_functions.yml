@@ -48,7 +48,7 @@
 
           payload = json_build_object('table', TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,
                                       'action', TG_OP,
-                                      'data', json_build_object(NULL),
+                                      'data', json_build_object('date',now()),
                                       'timestamp',now()::text);
 
           PERFORM pg_notify('pg_notify_exporter', payload::text);
