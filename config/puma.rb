@@ -1,5 +1,5 @@
 # How many worker processes to run.
-workers 1
+workers 0
 
 # Bind the server to
 bind 'tcp://0.0.0.0:9292'
