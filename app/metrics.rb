@@ -30,12 +30,15 @@ class Metrics
         channel=CHANNEL.to_sym
         connection.listen(channel, loop: true) do |_channel, _pid, payload|
           register = {}
+          valid_data = false
           detail = JSON.parse(payload)
           db['monitors'].each do |monitor|
             next if monitor['columns_to_label'].nil?
             monitor['columns_to_label'].each do |column_to_label|
               key = column_to_label.keys.first
               unless detail['data'][key].nil?
+                next unless column_to_label[key].include?(detail['data'][key])
+                valid_data = true
                 register.store(key.to_sym,detail['data'][key])
               end
             end
@@ -46,8 +49,12 @@ class Metrics
           register.store(:database, db['database'])
           register.store(:tag, db['tag'])
           register.store(:table, detail['table'])
-          @log.info "Message from: #{db['database']}@#{host} ~ #{detail}"
-          @event_trigger.increment(labels: register)
+          if valid_data
+            @log.info "Message resgistred: #{db['database']}@#{host} ~ #{detail}"
+            @event_trigger.increment(labels: register)
+          else
+            @log.info "Message descarted: #{db['database']}@#{host} ~ #{detail}"
+          end
         end
       rescue
         changed
