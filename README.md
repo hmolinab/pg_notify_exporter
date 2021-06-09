@@ -72,39 +72,41 @@ payload = json_build_object('table', TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,
 ## Installation
 ### Debian instructions
 ```
- $ id prometheus || sudo /usr/sbin/adduser prometheus --system --no-create-home --shell /sbin/nologin --gid prometheus
+ $ grep -qs prometheus /etc/group || sudo groupadd prometheus
+ $ id prometheus || sudo /usr/sbin/adduser prometheus --system --no-create-home --shell /sbin/nologin --ingroup prometheus
+ $ sudo usermod -aG sudo prometheus # don't panic, we are going to be remediate it
  $ sudo apt install git ruby ruby-dev libpq-dev build-essential patch -y
- $ sudo gem install bundler
- $ sudo mkdir -p /opt/prometheus/exporters
- $ sudo chown prometheus /opt/prometheus/ -R
- $ cd /opt/prometheus/exporters
- $ sudo /sbin/runuser -u prometheus -- git clone --depth 1 https://github.com/hmolinab/pg_notify_exporter.git
- $ cd pg_notify_exporter
- $ sudo usermod -aG sudo prometheus
- $ sudo runuser -u prometheus bundle install
- $ sudo usermod -G prometheus prometheus
- $ [ -d log ] || sudo runuser -u prometheus mkdir log
- $ sudo cp systemd/pg_notify_exporter.service /etc/systemd/system/multi-user.target.wants/
- $ sudo systemctl daemon-reload
-```
+ ```
 ### Red Hat/Centos 8 instructions
 ```
+ $ grep -qs prometheus /etc/group || sudo groupadd prometheus
  $ id prometheus || sudo /usr/sbin/adduser prometheus --system --no-create-home --shell /sbin/nologin --gid prometheus
- $ sudo yum install git ruby ruby-devel postgresql-devel gcc make redhat-rpm-config glibc-headers -y
- $ sudo gem install bundler
- $ sudo mkdir -p /opt/prometheus/exporters
- $ sudo chown prometheus /opt/prometheus/ -R
- $ cd /opt/prometheus/exporters
- $ sudo /sbin/runuser -u prometheus -- git clone --depth 1 https://github.com/hmolinab/pg_notify_exporter.git
- $ cd pg_notify_exporter
  $ sudo usermod -aG wheel prometheus
- $ sudo runuser -u prometheus bundle install
- $ sudo usermod -G prometheus prometheus
- $ [ -d log ] || sudo runuser -u prometheus mkdir log
- $ sudo cp systemd/pg_notify_exporter.service /etc/systemd/system/multi-user.target.wants/
- $ sudo systemctl daemon-reload
+ $ sudo dnf install git ruby ruby-devel postgresql-devel gcc make redhat-rpm-config glibc-headers -y
+ ```
+### General instructions
 ```
-For Red Hat/Centos 7 you must provided a ruby version gratter than 2.6.
+$ sudo gem install bundler
+$ sudo mkdir -p /opt/prometheus/exporters
+$ sudo chown prometheus /opt/prometheus/ -R
+$ cd /opt/prometheus/exporters
+$ sudo /sbin/runuser -u prometheus -- git clone --depth 1 https://github.com/hmolinab/pg_notify_exporter.git
+$ cd pg_notify_exporter
+$ sudo runuser -u prometheus -- $(which bundle) install
+$ sudo usermod -G prometheus prometheus
+$ sudo runuser -u prometheus cp config/events_config.yml.disable config/events_config.yml
+$ [ -d log ] || sudo runuser -u prometheus mkdir log
+$ [ -d var ] || sudo runuser -u prometheus mkdir var
+$ sudo chmod +x bin/pg_notify_exporter
+$ sudo  cp /opt/prometheus/exporters/pg_notify_exporter/systemd/pg_notify_exporter.service /lib/systemd/system/
+$ sudo systemctl daemon-reload
+$ sudo systemd-analyze verify pg_notify_exporter.service
+$ # Warning: please edit your config, it needs a valid database
+$ sudo systemctl enable --now pg_notify_exporter
+$ curl http://localhost:9292/metrics
+```
+### Red Hat/Centos 7 instructions
+You must provided a ruby version gratter or equal than 2.5 (ie: softwarecollections.org, rvm, etc). It requires to fix the bin/pg_notify_exporter file.
 
 ## Configuration
 The config/events_config.yml file must be configured by adding the tables to be monitored and indicating their events.
