@@ -1,4 +1,23 @@
 #!/bin/bash
-#source scl_source enable rh-ruby26
-#/opt/rh/rh-ruby26/root/usr/local/bin/bundle exec puma -b tcp://0.0.0.0:9292 --dir /opt/prometheus/exporters/pg_notify_exporter
-bundle exec puma -b tcp://0.0.0.0:9292 --dir /opt/prometheus/exporters/pg_notify_exporter
+
+#
+# Alternative: using sooftware Collections
+#
+# source scl_source enable rh-ruby26
+# /opt/rh/rh-ruby26/root/usr/local/bin/bundle exec puma -b tcp://0.0.0.0:9292 --dir /opt/prometheus/exporters/pg_notify_exporter
+
+#
+# Alternative: /usr/local/bin/puma
+#
+# /usr/local/bin/puma -C config/puma.rb --dir /opt/prometheus/exporters/pg_notify_exporter
+
+#
+# Alternative: bundle exec
+#
+BUNDLE=$(which bundle)
+$BUNDLE exec puma -C config/puma.rb --dir /opt/prometheus/exporters/pg_notify_exporter
+
+#
+# Alternative rvm
+#
+# /usr/local/rvm/bin/rvm all do bundle exec puma -C config/puma.rb --dir /opt/prometheus/exporters/pg_notify_exporter
