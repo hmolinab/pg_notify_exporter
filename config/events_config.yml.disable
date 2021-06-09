@@ -7,7 +7,7 @@
       password: postgres
       enabled:  true
       monitors:
-      - table: one
+      - table: public.one
         enabled: yes
         function: notification_with_payload
         columns_to_label:
@@ -17,7 +17,7 @@
             - 'gama'
         events:
           - insert
-      - table: two
+      - table: public.two
         enabled: yes
         function: simple_event_notification
         events:
