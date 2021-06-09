@@ -7,9 +7,10 @@
 # /opt/rh/rh-ruby26/root/usr/local/bin/bundle exec puma -b tcp://0.0.0.0:9292 --dir /opt/prometheus/exporters/pg_notify_exporter
 
 #
-# Alternative: /usr/local/bin/puma
+# Alternative: puma
 #
-# /usr/local/bin/puma -C config/puma.rb --dir /opt/prometheus/exporters/pg_notify_exporter
+#PUMA=$(which puma)
+#$PUMA -C config/puma.rb --dir /opt/prometheus/exporters/pg_notify_exporter
 
 #
 # Alternative: bundle exec
