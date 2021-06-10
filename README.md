@@ -67,44 +67,6 @@ payload = json_build_object('table', TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,
                             'timestamp',now()::text);
 ```
 
-
-
-## Installation
-### Debian instructions
-```
- $ grep -qs prometheus /etc/group || sudo groupadd prometheus
- $ id prometheus || sudo /usr/sbin/adduser prometheus --system --no-create-home --shell /sbin/nologin --ingroup prometheus
- $ sudo apt install git ruby ruby-dev libpq-dev build-essential patch ruby-bundler -y
- ```
-### Red Hat/Centos 8 instructions
-```
- $ grep -qs prometheus /etc/group || sudo groupadd prometheus
- $ id prometheus || sudo /usr/sbin/adduser prometheus --system --no-create-home --shell /sbin/nologin --gid prometheus
- $ sudo dnf install git ruby ruby-devel postgresql-devel gcc make redhat-rpm-config glibc-headers openssl-devel rubygem-bundler rubygem-openssl -y
- ```
-### General instructions
-```
-$ sudo mkdir -p /opt/prometheus/exporters
-$ sudo chown $(whoami) /opt/prometheus/exporters
-$ cd /opt/prometheus/exporters
-$ git clone --depth 1 https://github.com/hmolinab/pg_notify_exporter.git
-$ cd pg_notify_exporter
-$ sudo $(which bundle) install
-$ cp config/events_config.yml.disable config/events_config.yml
-$ mkdir -p log var
-$ PUMA_BIN=$(which puma)
-$ sed -i -e "s#PUMA_BIN#$PUMA_BIN#g" systemd/pg_notify_exporter.service
-$ sudo chown prometheus.prometheus /opt/prometheus/ -R
-$ sudo cp /opt/prometheus/exporters/pg_notify_exporter/systemd/pg_notify_exporter.service /lib/systemd/system/
-$ sudo systemd-analyze verify pg_notify_exporter.service
-$ sudo systemctl daemon-reload
-$ # Warning: edit your config, it needs a valid database
-$ sudo systemctl enable --now pg_notify_exporter
-$ curl http://localhost:9292/metrics
-```
-### Red Hat/Centos 7 instructions
-You must provided a ruby version gratter or equal than 2.5 (ie: softwarecollections.org, rvm, etc). The file bin/pg_notify_exporter can help you to start the service.
-
 ## Configuration
 The config/events_config.yml file must be configured by adding the tables to be monitored and indicating their events.
 ```
@@ -139,6 +101,7 @@ The config/events_config.yml file must be configured by adding the tables to be 
         #    - 1
 ...
 ```
+### configuration keys
 
 | Config key | Value | Mandatory |
 |------------|-------|=---------=|
@@ -157,7 +120,16 @@ The config/events_config.yml file must be configured by adding the tables to be 
 | code |  Config section | no |
 | events | insert, delete, update | yes |
 
-## Test tables
+
+## Execution
+### Testing
+If you test by hand, or your are setting the trigger function the ruckup statement that will enable the service on port 9292 must be executed:
+```
+ $ bundle install
+ $ bundle exec puma -C config/puma.rb --dir .
+ Puma starting in single mode...
+```
+### Test tables
 ```
 CREATE TABLE public.one (
     code character varying
@@ -178,28 +150,11 @@ and
 $ curl http://localhost:9292/metrics | grep pg_notify_exporter
 ```
 
-
-## Execution
-If you test by hand, or your are setting the trigger function the ruckup statement that will enable the service on port 9292 must be executed:
-```
- # puma -b tcp://0.0.0.0.0:9292
- Puma starting in single mode...
-* Version 4.3.6 (ruby 2.6.5-p114), codename: Mysterious Traveller
-* Min threads: 0, max threads: 16
-* Environment: development
-* Listening on tcp://127.0.0.0.1:9292
-* Listening on tcp://[::1]:9292
-Use Ctrl-C to stop
-```
-For production the better way to use the systemd integration disabling the perform_setup configuration and using a monitor username.
-```
-systemctl start pg_notify_exporter
-```
+### Production
+For production the better way is to use the systemd integration, disabling the perform_setup configuration and using a non privileged username. See systemd/README.md.
 
 ## Operation
-When starting the service it reads the details provided in the configuration file connecting to each database, then it creates the event_on_table_notify function and finally it creates a trigger for each table defined in the defined events.
-
-If you want to delete the triggers, simply disable the database, which causes the triggers to be deleted. it is also possible to disable a particular table.
+When starting the service it reads the details provided in the configuration file connecting to each database, then it creates the defined function and finally it creates a trigger for each defined table.
 
 For the trigger creation, the database and the tables must be enabled. It is important to point out that if a database is disabled, the application will still try to connect,
 to prevent the connection it must be commented in the configuration.
