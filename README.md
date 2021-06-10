@@ -103,6 +103,7 @@ The config/events_config.yml file must be configured by adding the tables to be 
 ```
 ### configuration keys
 
+
 | Config key | Value | Mandatory |
 |------------|-------|=---------=|
 | localhost | Database host | yes |
