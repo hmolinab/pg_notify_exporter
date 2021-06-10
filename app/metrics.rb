@@ -50,10 +50,10 @@ class Metrics
           register.store(:tag, db['tag'])
           register.store(:table, detail['table'])
           if valid_data
-            @log.info "Message resgistred: #{db['database']}@#{host} ~ #{detail}"
+            @log.info "Message registered: #{db['database']}@#{host} ~ #{detail}"
             @event_trigger.increment(labels: register)
           else
-            @log.info "Message descarted: #{db['database']}@#{host} ~ #{detail}"
+            @log.info "Message discarded : #{db['database']}@#{host} ~ #{detail}"
           end
         end
       rescue
