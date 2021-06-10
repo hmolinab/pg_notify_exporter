@@ -105,7 +105,7 @@ The config/events_config.yml file must be configured by adding the tables to be 
 
 
 | Config key | Value | Mandatory |
-|------------|-------|=---------=|
+|------------|-------|:---------:|
 | localhost | Database host | yes |
 | database  | Database name | yes |
 | tag | Business tag | yes |
