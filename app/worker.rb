@@ -69,13 +69,13 @@ class Worker
     #conn_str  += "gssencmode=disable"
     begin
       @log.info "Connecting: #{target}"
-      connection = Sequel.postgres(conn_str: conn_str + " password=#{db['password']} ")
+      connection = Sequel.postgres(conn_str: conn_str)
     rescue
-      @log.error "It's not possible to connect: #{conn_str}"
+      @log.error "It's not possible to connect: #{conn_str.gsub(/password.*/, '')}"
       @log.error $!.to_s.lines.first
       return false
     end
-    @log.info connection.inspect
+    @log.info "Connection success to #{target}"
     return connection
   end
 
