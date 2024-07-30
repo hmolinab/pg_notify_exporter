@@ -72,7 +72,7 @@ class Worker
       connection = Sequel.postgres(conn_str: conn_str + " password=#{db['password']} ")
     rescue
       @log.error "It's not possible to connect: #{conn_str}"
-      #@log.error $!
+      @log.error $!.to_s.lines.first
       return false
     end
     @log.info connection.inspect
@@ -84,7 +84,7 @@ class Worker
       next unless function['name'] == monitor['function']
       return function['function_body']
     end
-    @log.error "No function #{monitor['function']} found."
+    @log.error "No function '#{monitor['function']}' found."
   end
 
   def database_setup(host,db)
@@ -106,8 +106,14 @@ class Worker
 
       # Drop triggers
       drop_triggers = "DROP TRIGGER IF EXISTS trigger_#{monitor['function']} on #{monitor['table']}"
-      connection.run drop_triggers
-      @log.info "#{db['database']}@#{host} Trigger dropped at: #{monitor['table']}"
+      begin
+        connection.run drop_triggers
+        @log.info "#{db['database']}@#{host} Trigger dropped at: #{monitor['table']}"
+      rescue
+        @log.error "#{db['database']}@#{host} it's not possible to drop the trigger at: #{monitor['table']}, check your database log."
+        @log.error "#{drop_triggers}"
+        @log.error $!.to_s.lines.first
+      end
 
       # Jump if either database or table is disabled
       # This is to clean triggers
@@ -118,15 +124,28 @@ class Worker
 
       # NOTIFY_FUNCTION creation
       function_statement = get_funtion(monitor)
-      connection.run function_statement
-      @log.info "Adding functions"
-      @log.info "#{db['database']}@#{host} Function created: #{monitor['function']}"
+      begin
+        connection.run function_statement
+        @log.info "Adding functions"
+        @log.info "#{db['database']}@#{host} Function created: #{monitor['function']}"
+        @log.info function_statement
+      rescue
+        @log.error "#{db['database']}@#{host} it's not possible to create the function, check your database log."
+        @log.error "Action: \n#{function_statement}"
+        @log.error $!.to_s.lines.first
+      end
 
       # Trigger creation
       trigger_statement = build_trigger(monitor)
-      connection.run trigger_statement
-      @log.info "Adding triggers"
-      @log.info trigger_statement.gsub("\n",' ')
+      begin
+        connection.run trigger_statement
+        @log.info "Adding triggers"
+        @log.info trigger_statement.gsub("\n",' ')
+      rescue
+        @log.error "#{db['database']}@#{host} it's not possible to create the triggers, check your database log."
+        @log.error "Action: \n#{trigger_statement}"
+        @log.error $!.to_s.lines.first
+      end
 
     end #db['monitors']
     return connection
