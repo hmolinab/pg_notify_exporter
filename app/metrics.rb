@@ -33,7 +33,10 @@ class Metrics
           valid_data = false
           detail = JSON.parse(payload)
           db['monitors'].each do |monitor|
-            next if monitor['columns_to_label'].nil?
+            if monitor['columns_to_label'].nil?
+              valid_data = true
+              next
+            end
             monitor['columns_to_label'].each do |column_to_label|
               key = column_to_label.keys.first
               unless detail['data'][key].nil?
@@ -49,16 +52,17 @@ class Metrics
           register.store(:database, db['database'])
           register.store(:tag, db['tag'])
           register.store(:table, detail['table'])
-          if valid_data
+          if valid_data 
             @log.info "Message registered: #{db['database']}@#{host} ~ #{detail}"
             @event_trigger.increment(labels: register)
           else
-            @log.info "Message discarded : #{db['database']}@#{host} ~ #{detail}"
+            @log.info "Message discarted : #{db['database']}@#{host} ~ #{detail}"
           end
         end
       rescue
         changed
         connection.disconnect
+        @log.error $!
         @log.error "Last message:"
         @log.error detail
         @log.error "Recovering connection #{db['database']}@#{host}"
