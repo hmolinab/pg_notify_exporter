@@ -68,6 +68,16 @@ payload = json_build_object('table', TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,
 ```
 
 ## Configuration
+### Database user
+
+```
+CREATE USER pg_notify_exporter WITH PASSWORD 'set a-secure_one!';
+ALTER USER pg_notify_exporter NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS CONNECTION LIMIT 2;
+GRANT USAGE ON SCHEMA PUBLIC TO pg_notify_exporter;
+GRANT TRIGGER ON LOGISTICA.ORDERSTATE TO pg_notify_exporter;
+```
+### Exporter configuration
+
 The config/events_config.yml file must be configured by adding the tables to be monitored and indicating their events.
 ```
 ---
