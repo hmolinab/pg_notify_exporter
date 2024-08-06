@@ -4,3 +4,4 @@ config/events_config.yml
 var/*
 *.tmp
 *.sw?
+TOKEN
