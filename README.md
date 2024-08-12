@@ -68,23 +68,12 @@ payload = json_build_object('table', TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,
 ```
 
 ## Configuration
-### Database user
-
-```
-CREATE USER pg_notify_exporter WITH PASSWORD 'set a-secure_one!';
-ALTER USER pg_notify_exporter NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS CONNECTION LIMIT 2;
-GRANT USAGE ON SCHEMA PUBLIC TO pg_notify_exporter;
-GRANT TRIGGER ON LOGISTICA.ORDERSTATE TO pg_notify_exporter;
-```
-### Exporter configuration
-
 The config/events_config.yml file must be configured by adding the tables to be monitored and indicating their events.
 ```
 ---
 ---
   - localhost:
     - database: test
-      tag: business_tag
       perform_setup: true
       username: postgres
       password: secret
@@ -92,23 +81,18 @@ The config/events_config.yml file must be configured by adding the tables to be 
       monitors:
       - table: one
         enabled: yes
-        function: notification_with_payload
-        columns_to_label:
-          - code:
-            - 'alpha'
-            - 'beta'
-            - 'gamma'
+        function: notification_with_tag
         events:
           - insert
+        tags:
+          - t_warning
+          - t_normal
       - table: two
         enabled: yes
         function: simple_event_notification
         events:
           - INSERT
           - delete
-        #columns_to_label:
-        #  - id:
-        #    - 1
 ...
 ```
 ### configuration keys
@@ -118,7 +102,6 @@ The config/events_config.yml file must be configured by adding the tables to be 
 |------------|-------|:---------:|
 | localhost | Database host | yes |
 | database  | Database name | yes |
-| tag | Business tag | yes |
 | perform_setup | true or false | yes |
 | username | Connection username | yes |
 | password | Connection password | yes |
@@ -127,8 +110,7 @@ The config/events_config.yml file must be configured by adding the tables to be 
 | table | table name | yes |
 | enabled  | true or false | yes |
 | function | Function name | yes |
-| columns_to_label | Config section | yes |
-| code |  Config section | no |
+| tags | Business tag | no |
 | events | insert, delete, update | yes |
 
 

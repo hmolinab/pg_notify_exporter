@@ -1,5 +1,5 @@
 ---
-  - name: notification_with_payload
+  - name: notification_with_tag
     function_body: >-
       CREATE OR REPLACE FUNCTION notification_with_payload()
           RETURNS trigger AS $$
@@ -7,6 +7,7 @@
           record RECORD;
           payload JSON;
           err_context text;
+          tag text;
         BEGIN
           IF (TG_OP = 'DELETE') THEN
             record = OLD;
@@ -14,9 +15,15 @@
             record = NEW;
           END IF;
 
+          IF ((random()*10)::int%2 = 0) THEN
+            tag = 'even';
+          ELSE
+            tag = 'ogg';
+          END IF;
+
           payload = json_build_object('table', TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,
                                       'action', TG_OP,
-                                      'data', json_build_object('code',NEW.code),
+                                      'tag', tag,
                                       'timestamp',now()::text);
 
           PERFORM pg_notify('pg_notify_exporter', payload::text);
