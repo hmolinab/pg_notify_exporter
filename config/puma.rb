@@ -1,3 +1,5 @@
+require 'puma/daemon'
+
 # How many worker processes to run.
 workers 0
 
