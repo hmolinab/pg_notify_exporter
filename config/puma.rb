@@ -1,5 +1,3 @@
-require 'puma/daemon'
-
 # How many worker processes to run.
 workers 0
 
@@ -16,8 +14,6 @@ pidfile 'var/puma.pid'
 # Use “path” as the file to store the server info state. This is
 # used by “pumactl” to query and control the server.
 state_path 'var/puma.state'
-
-daemonize
 
 # Disable request logging.
 # The default is “false”.
