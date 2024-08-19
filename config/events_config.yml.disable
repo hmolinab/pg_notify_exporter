@@ -9,7 +9,7 @@
       monitors:
       - table: public.one
         enabled: yes
-        function: notification_with_payload
+        function: notification_with_tag
         columns_to_label:
           - code:
             - 'alpha'
