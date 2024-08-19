@@ -7,4 +7,4 @@ gem 'nio4r', '~>2.7'
 gem 'sequel', '~>5.83'
 gem 'sequel_pg', '~>1.17'
 gem 'sd_notify', '~>0.1'
-
+gem 'observer', '~>0.1.2'
